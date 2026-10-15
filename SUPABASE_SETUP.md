@@ -5,13 +5,15 @@ This connects the website to Supabase so the president can edit content from the
 
 **What you'll end up with**
 
-| Dashboard             | URL              | What it manages                                                                                                                                                       |
-| --------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Homepage editor**   | `/admin/content` | Organisation details, headline numbers, members map, founder, internships, steps, FAQs, scholarships, news, YouTube videos, members, patrons, pillars, wings, journey |
-| **Events**            | `/admin/events`  | Create, edit, hide and delete events with a cover photo                                                                                                               |
-| **Gallery**           | `/admin/gallery` | Bulk-upload photos with captions and categories, edit, delete                                                                                                         |
-| **Student Journal**   | `/admin/journal` | Student articles with an attached PDF or Word paper                                                                                                                   |
-| **Internship portal** | `/portal`        | Internships, coordinators, intern invite links, tasks with deadlines, intern work and progress                                                                        |
+| Dashboard              | URL               | What it manages                                                                                                                                                       |
+| ---------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Homepage editor**    | `/admin/content`  | Organisation details, headline numbers, members map, founder, internships, steps, FAQs, scholarships, news, YouTube videos, members, patrons, pillars, wings, journey |
+| **Events**             | `/admin/events`   | Create, edit, hide and delete events with a cover photo                                                                                                               |
+| **Gallery**            | `/admin/gallery`  | Bulk-upload photos with captions and categories, edit, delete                                                                                                         |
+| **Student Journal**    | `/admin/journal`  | Student articles with an attached PDF or Word paper                                                                                                                   |
+| **Registered members** | `/admin/registry` | The full member list on `/registered-members`: name, location and member ID. Import from a spreadsheet                                                                |
+| **Team**               | `/admin/team`     | President only: appoint dashboard coordinators with an invite link, remove them                                                                                       |
+| **Internship portal**  | `/portal`         | Internships, coordinators, intern invite links, tasks with deadlines, intern work and progress                                                                        |
 
 ---
 
@@ -57,6 +59,13 @@ This creates:
 > the internship tables, the invite-link functions and a **private** `internship-files` bucket
 > (25 MB per file). New projects don't need it, because `schema.sql` already includes it.
 
+> **Already set up before the Team page and Registered Members were added?** Run
+> [`supabase/team-and-registry.sql`](supabase/team-and-registry.sql) once in a new SQL Editor query
+> (after `internships.sql`). It adds the president / coordinator roles, coordinator invite links and
+> the `registered_members` table, and makes the Internship portal president-only. Everyone already
+> in `admins` becomes a **president**. New projects don't need it, because `schema.sql` already
+> includes it.
+
 ### Optional: start with the sample events and photos
 
 To keep the sample events and gallery from the preview (you can delete them later from the dashboards),
@@ -84,14 +93,17 @@ Creating a login is not enough. The account must also be listed as an admin.
 3. Replace `president@example.com` with the email from Step 4.
 4. Click **Run**. The result table at the bottom should list that email.
 
-Repeat steps 4–5 for anyone else who should have access.
-To remove access later: `delete from public.admins where email = 'someone@example.com';`
+This makes them a **president** (full access). Repeat steps 4–5 only for another president.
+**Coordinators** (people who help edit the website) are appointed from the dashboard instead: see
+**Team** in Step 9. To remove a president later:
+`delete from public.admins where email = 'someone@example.com';`
 
 ## Step 6: Sign-up settings (for intern accounts)
 
 Interns and coordinators create their own account when they open an invite link, so sign-ups must
 stay **on**. That's safe: an account that didn't come through a valid invite link has no access to
-anything, and only the president (Step 5) can open the website dashboards.
+anything. Only the president (Step 5) and coordinators the president appoints can open the website
+dashboards.
 
 1. Open **Authentication → Sign In / Providers** (called **Providers** in some versions).
 2. Under **User Signups**, make sure **Allow new users to sign up** is **on**.
@@ -167,19 +179,43 @@ Open **`https://your-site/admin`**, sign in with the president's email and passw
   to hide an event without deleting it.
 - **Gallery:** drop several photos at once, set captions and categories, then **Upload**. Large phone
   photos are resized automatically before upload.
+- **Campus & Court Leadership** (Homepage editor → Programmes → Leadership programmes): the text and
+  responsibilities for each programme, and its **Application form link** (the apply button). Add or
+  remove programmes there too.
+- **Latest update** (Homepage editor → Updates → Latest update (hero)): one line in the hero about what
+  VES did most recently, with an optional link. Turn it off with the switch. This is separate from the
+  Inside VES news list.
+- **Donate** (Homepage editor → Organisation → Donate (footer)): the block at the top of the footer.
+  Add a payment link (Razorpay, Instamojo, a UPI payment page…), a UPI ID (shown with a copy button)
+  and any other details such as bank account or 80G information.
+- **Wings:** each wing has a **View button link** and label (Homepage editor → About VES →
+  Organisation wings). The View button appears once a link is set. Links can be full web addresses
+  or pages on the site such as `/gallery`.
+- **Registered members** (`/admin/registry`): the full member list shown on `/registered-members`
+  (in the header's **More** menu). **Import list** accepts rows copied from Excel or Google Sheets,
+  or a CSV file, one member per line: _Name, Location, ID_. Location and ID are optional; members
+  without an ID get the next one automatically (VES-0001, VES-0002 …). **Export CSV** downloads the
+  whole list. Tick rows to delete several at once.
+- **Team** (`/admin/team`, president only): **Appoint a coordinator** creates an invite link (expires
+  after 1–30 days, for 1 person by default). Send it to them; they create an account or sign in and get
+  the dashboard. Coordinators can use every dashboard (Homepage editor, Events, Gallery, Student
+  Journal, Registered members) but **not** the Internship portal or the Team page. Remove a
+  coordinator from the same page; their access ends immediately.
 
 ## Step 10: Run an internship (the Internship portal)
 
 The portal lives at **`https://your-site/portal`** (also linked as **Intern login** in the website
 footer and **Internship portal** in the dashboard). There are three kinds of account:
 
-| Account                            | How they get in                                   | What they can do                                                                                                      |
-| ---------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **President**                      | The admin login from Steps 4–5                    | Everything: create internships, appoint coordinators, and everything a coordinator can do in every internship         |
-| **Coordinator** (internship admin) | A _coordinator_ invite link made by the president | Only their internship(s): invite interns, assign tasks with deadlines, follow progress, give feedback, remove interns |
-| **Intern** (student)               | An _intern_ invite link                           | Only their own tasks: write or upload their work, complete tasks, see what's left and their performance               |
+| Account                    | How they get in                                   | What they can do                                                                                                      |
+| -------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **President**              | The admin login from Steps 4–5                    | Everything: create internships, appoint coordinators, and everything a coordinator can do in every internship         |
+| **Internship coordinator** | A _coordinator_ invite link made by the president | Only their internship(s): invite interns, assign tasks with deadlines, follow progress, give feedback, remove interns |
+| **Intern** (student)       | An _intern_ invite link                           | Only their own tasks: write or upload their work, complete tasks, see what's left and their performance               |
 
-Coordinators and interns can only reach the portal, never the website dashboards.
+Internship coordinators and interns can only reach the portal, never the website dashboards. The
+_dashboard_ coordinators from the Team page are different: they edit the website but can't open the
+portal.
 
 1. **Create the internship.** Open `/portal` → **New internship**. Give it a name, start and end dates
    and a short description. Make one for each type of internship (e.g. _Legal Research · Winter 2026_,
@@ -231,6 +267,8 @@ hour.
 | Invite page says **"This link has expired"**                                   | The link expired, was revoked or reached its sign-up limit. Create a new one in **Invite links**.              |
 | **"This account isn't part of an internship yet"** on `/portal/login`          | The account never joined, or was removed. Send them a fresh invite link.                                       |
 | Portal shows **"relation internship_programs does not exist"**                 | Run `supabase/internships.sql` (Step 2).                                                                       |
+| Team or Registered members says **"Run supabase/team-and-registry.sql"**       | Run `supabase/team-and-registry.sql` (Step 2).                                                                 |
+| A coordinator says the Internship portal shows **"Not part of an internship"** | Expected: dashboard coordinators don't have portal access. Only the president does.                            |
 
 ## How it fits together (for developers)
 

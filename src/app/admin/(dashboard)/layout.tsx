@@ -15,12 +15,15 @@ export default function DashboardLayout({ children }: LayoutProps<"/admin">) {
 }
 
 async function AdminShell({ children }: { children: React.ReactNode }) {
-  const [{ user, isAdmin }, { site }] = await Promise.all([requireAdminPage(), getContent()]);
+  const [{ user, isAdmin, role }, { site }] = await Promise.all([
+    requireAdminPage(),
+    getContent(),
+  ]);
   if (!isAdmin) return <NotAuthorized email={user!.email} />;
 
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
-      <AdminSidebar email={user!.email} logo={site.logo} />
+      <AdminSidebar email={user!.email} logo={site.logo} role={role ?? "coordinator"} />
       <div className="min-w-0 flex-1">{children}</div>
     </div>
   );

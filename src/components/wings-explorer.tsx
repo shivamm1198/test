@@ -8,6 +8,7 @@ import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Wing } from "@/lib/content/schema";
 import { Button } from "@/components/ui/button";
+import { SmartLink } from "@/components/smart-link";
 import { easeOut } from "@/components/motion";
 import { iconComponents } from "@/components/icon-map";
 
@@ -122,11 +123,28 @@ export function WingsExplorer({ wings }: { wings: Wing[] }) {
                 <p className="text-xs text-white/45">Wing head</p>
                 <p className="font-serif text-xl">{wing.head}</p>
               </div>
-              <Button asChild variant="inverse">
-                <Link href={`/contact?subject=wing-${wing.key}`}>
-                  Volunteer with this wing <ArrowUpRight />
-                </Link>
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                {wing.viewUrl && (
+                  <Button asChild variant="gold">
+                    <SmartLink href={wing.viewUrl}>
+                      {wing.viewLabel || "View"} <ArrowUpRight />
+                    </SmartLink>
+                  </Button>
+                )}
+                <Button
+                  asChild
+                  variant={wing.viewUrl ? "outline" : "inverse"}
+                  className={
+                    wing.viewUrl
+                      ? "border-white/25 bg-transparent text-white hover:border-white hover:bg-white/5 hover:text-white"
+                      : undefined
+                  }
+                >
+                  <Link href={`/contact?subject=wing-${wing.key}`}>
+                    Volunteer with this wing <ArrowUpRight />
+                  </Link>
+                </Button>
+              </div>
             </div>
           </motion.article>
         </AnimatePresence>

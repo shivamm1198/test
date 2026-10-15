@@ -54,6 +54,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   const isLogin = pathname === "/admin/login";
+  // Coordinator invite links work signed out, so new team members can create an account.
+  if (pathname.startsWith("/admin/join/")) return response;
 
   if (!signedIn && !isLogin) {
     const url = request.nextUrl.clone();

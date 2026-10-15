@@ -24,7 +24,8 @@ export const getPortalSession = cache(async (): Promise<PortalSession | null> =>
   if (!claims) return null;
 
   const [president, members] = await Promise.all([
-    supabase.rpc("is_admin"),
+    // Dashboard coordinators are admins but not presidents, so they get no portal access.
+    supabase.rpc("is_president").then((r) => (r.error ? supabase.rpc("is_admin") : r)), // before team-and-registry.sql
     supabase
       .from("internship_members")
       .select("program_id, role, full_name")

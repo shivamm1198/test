@@ -8,16 +8,17 @@ Built with **Next.js 16 (App Router)**, **Tailwind CSS v4**, **shadcn/ui** (Radi
 
 ## Pages
 
-| Route          | Contents                                                                                                                                                                          |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`            | Hero with an interactive India map of members, About, Founder, Internships, Scholarships, Gallery, Events, Inside VES news, Members carousel (32), Four Pillars, Patrons, YouTube |
-| `/internships` | How it works, a filterable and searchable list of openings with an apply dialog, Scholarships, FAQs                                                                               |
-| `/gallery`     | Category filters, masonry grid, lightbox (keyboard ← →), events, videos                                                                                                           |
-| `/journey`     | Timeline from 2020 to today with a scroll-linked gold progress rail                                                                                                               |
-| `/wings`       | Interactive explorer for the 8 wings and an org-structure diagram                                                                                                                 |
-| `/about`       | Mission, vision, story, founder, what we do, pillars, patrons                                                                                                                     |
-| `/contact`     | Validated contact form (`/contact?subject=membership` preselects a topic) and contact details                                                                                     |
-| `/journal`     | Student Journal articles, each with its own page and attached paper                                                                                                               |
+| Route                 | Contents                                                                                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                   | Hero with an interactive India map of members, About, Founder, Internships, Scholarships, Gallery, Events, Inside VES news, Members carousel (32), Four Pillars, Patrons, YouTube |
+| `/internships`        | How it works, a filterable and searchable list of openings with an apply dialog, Scholarships, FAQs                                                                               |
+| `/gallery`            | Category filters, masonry grid, lightbox (keyboard ← →), events, videos                                                                                                           |
+| `/journey`            | Timeline from 2020 to today with a scroll-linked gold progress rail                                                                                                               |
+| `/wings`              | Interactive explorer for the 8 wings and an org-structure diagram                                                                                                                 |
+| `/about`              | Mission, vision, story, founder, what we do, pillars, patrons                                                                                                                     |
+| `/contact`            | Validated contact form (`/contact?subject=membership` preselects a topic) and contact details                                                                                     |
+| `/registered-members` | Every registered member across India (name, location, member ID), searchable, 50 per page                                                                                         |
+| `/journal`            | Student Journal articles, each with its own page and attached paper                                                                                                               |
 
 ## Getting started
 
@@ -33,12 +34,14 @@ npm run format
 
 All content is editable at **`/admin`** (Supabase login required):
 
-| Dashboard       | Route            | Manages                                                                                                                                              |
-| --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Homepage editor | `/admin/content` | Organisation details, numbers, members map, founder, internships, steps, FAQs, scholarships, news, videos, members, patrons, pillars, wings, journey |
-| Events          | `/admin/events`  | Create, edit, hide and delete events with a cover photo                                                                                              |
-| Gallery         | `/admin/gallery` | Bulk upload, caption, categorise and delete photos                                                                                                   |
-| Student Journal | `/admin/journal` | Student articles with attached PDF/Word papers, shown on the homepage and `/journal`                                                                 |
+| Dashboard          | Route             | Manages                                                                                                                                              |
+| ------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Homepage editor    | `/admin/content`  | Organisation details, numbers, members map, founder, internships, steps, FAQs, scholarships, news, videos, members, patrons, pillars, wings, journey |
+| Events             | `/admin/events`   | Create, edit, hide and delete events with a cover photo                                                                                              |
+| Gallery            | `/admin/gallery`  | Bulk upload, caption, categorise and delete photos                                                                                                   |
+| Student Journal    | `/admin/journal`  | Student articles with attached PDF/Word papers, shown on the homepage and `/journal`                                                                 |
+| Registered members | `/admin/registry` | The `/registered-members` list: add, edit, delete, import from a spreadsheet, export CSV                                                             |
+| Team               | `/admin/team`     | President only: appoint and remove coordinators (every dashboard except the Internship portal)                                                       |
 
 ## Internship portal
 
@@ -101,7 +104,7 @@ src/
     supabase/          browser / server / public clients and the session proxy
   proxy.ts             refreshes the Supabase session on /admin, /portal and /auth routes
   data/site.ts         default content
-supabase/              SQL: schema.sql, journal.sql + internships.sql (existing projects), seed.sql (optional), make-admin.sql
+supabase/              SQL: schema.sql, journal.sql + internships.sql + team-and-registry.sql (existing projects), seed.sql (optional), make-admin.sql
 scripts/               placeholder image generator
 ```
 

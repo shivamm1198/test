@@ -4,10 +4,11 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
-import { ArrowUpRight, Menu } from "lucide-react";
+import { DropdownMenu } from "radix-ui";
+import { ArrowUpRight, ChevronDown, Menu } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { nav } from "@/data/site";
+import { nav, navMore } from "@/data/site";
 import type { Site } from "@/lib/content/schema";
 import { Logo } from "@/components/logo";
 import { SmartLink } from "@/components/smart-link";
@@ -88,6 +89,7 @@ export function SiteHeader({ site, joinHref }: { site: Site; joinHref: string })
               </Link>
             );
           })}
+          <MoreMenu pathname={pathname} />
         </nav>
 
         <div className="flex items-center gap-4">
@@ -112,7 +114,7 @@ export function SiteHeader({ site, joinHref }: { site: Site; joinHref: string })
                 <Menu />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-sm p-0">
+            <SheetContent side="right" className="w-full max-w-sm overflow-y-auto p-0">
               <div className="h-[3px] w-full gold-gradient" aria-hidden />
               <SheetHeader className="px-6 pt-6">
                 <SheetTitle className="font-serif text-2xl">{site.name}</SheetTitle>
@@ -141,6 +143,25 @@ export function SiteHeader({ site, joinHref }: { site: Site; joinHref: string })
                     </Link>
                   </motion.div>
                 ))}
+                <p className="mt-6 mb-1 text-[11px] font-semibold tracking-[0.22em] text-muted-foreground uppercase">
+                  More
+                </p>
+                {navMore.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex items-center justify-between border-b py-3 font-serif text-xl",
+                      isActive(pathname, item.href) ? "text-ink" : "text-foreground/60",
+                    )}
+                  >
+                    {item.label}
+                    {isActive(pathname, item.href) && (
+                      <span className="size-1.5 rounded-full bg-gold" />
+                    )}
+                  </Link>
+                ))}
               </nav>
               <div className="mt-auto p-6">
                 <Button asChild className="w-full" size="lg">
@@ -154,5 +175,58 @@ export function SiteHeader({ site, joinHref }: { site: Site; joinHref: string })
         </div>
       </div>
     </header>
+  );
+}
+
+/** Less-visited pages, tucked under "More" to keep the bar short. */
+function MoreMenu({ pathname }: { pathname: string }) {
+  const active = navMore.some((item) => isActive(pathname, item.href));
+  return (
+    <DropdownMenu.Root modal={false}>
+      <DropdownMenu.Trigger
+        className={cn(
+          "group relative inline-flex items-center gap-1 px-2 py-2 text-sm font-medium whitespace-nowrap outline-none transition-colors focus-visible:text-ink xl:px-3",
+          active ? "text-ink" : "text-foreground/60 hover:text-ink data-[state=open]:text-ink",
+        )}
+      >
+        More
+        <ChevronDown className="size-3.5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+        {active && (
+          <motion.span
+            layoutId="nav-underline"
+            className="absolute inset-x-2 -bottom-px h-[2px] gold-gradient xl:inset-x-3"
+            transition={{ type: "spring", stiffness: 380, damping: 34 }}
+          />
+        )}
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          align="end"
+          sideOffset={10}
+          className="z-50 w-72 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-xl border bg-white p-1.5 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.45)] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+        >
+          <div className="mb-1 h-[2px] rounded-full gold-gradient" aria-hidden />
+          {navMore.map((item) => (
+            <DropdownMenu.Item key={item.href} asChild>
+              <Link
+                href={item.href}
+                className={cn(
+                  "flex flex-col rounded-lg px-3 py-2.5 outline-none transition-colors data-[highlighted]:bg-paper",
+                  isActive(pathname, item.href) && "bg-paper",
+                )}
+              >
+                <span className="flex items-center gap-2 text-sm font-medium text-ink">
+                  {item.label}
+                  {isActive(pathname, item.href) && (
+                    <span className="size-1.5 rounded-full bg-gold" />
+                  )}
+                </span>
+                <span className="text-xs text-muted-foreground">{item.description}</span>
+              </Link>
+            </DropdownMenu.Item>
+          ))}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 }

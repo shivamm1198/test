@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { Stat } from "@/lib/content/derive";
-import type { Site, SiteContent, SiteImages } from "@/lib/content/schema";
+import type { LatestUpdate, Site, SiteContent, SiteImages } from "@/lib/content/schema";
 import { FloatingPhoto } from "@/components/floating-photo";
 import { Button } from "@/components/ui/button";
 import { CountUp, easeOut } from "@/components/motion";
@@ -25,12 +25,14 @@ export function Hero({
   stateMembers,
   images,
   joinHref,
+  latest,
 }: {
   site: Site;
   stats: Stat[];
   stateMembers: SiteContent["stateMembers"];
   images: SiteImages;
   joinHref: string;
+  latest?: LatestUpdate;
 }) {
   return (
     <section className="relative overflow-hidden">
@@ -90,6 +92,12 @@ export function Hero({
               <Link href="/about">Our story</Link>
             </Button>
           </motion.div>
+
+          {latest?.show && latest.text && (
+            <motion.div {...rise(0.38)} className="mt-7">
+              <LatestUpdateChip latest={latest} />
+            </motion.div>
+          )}
 
           <motion.dl
             {...rise(0.42)}
@@ -160,5 +168,40 @@ export function Hero({
         </div>
       </div>
     </section>
+  );
+}
+
+/** "What VES did latest": one line, optionally linked. */
+function LatestUpdateChip({ latest }: { latest: LatestUpdate }) {
+  const body = (
+    <>
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] text-gold-light uppercase">
+        <span className="relative flex size-1.5" aria-hidden>
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-gold-light opacity-70" />
+          <span className="relative inline-flex size-1.5 rounded-full bg-gold-light" />
+        </span>
+        {latest.label || "Latest"}
+      </span>
+      <span className="min-w-0 flex-1 text-sm leading-snug text-foreground/80">
+        {latest.text}
+        {latest.date && (
+          <span className="ml-2 text-xs whitespace-nowrap text-muted-foreground">
+            {latest.date}
+          </span>
+        )}
+      </span>
+      {latest.url && (
+        <ArrowRight className="size-4 shrink-0 text-gold-dark transition-transform group-hover:translate-x-0.5" />
+      )}
+    </>
+  );
+  const className =
+    "group flex w-full max-w-xl items-center gap-3 rounded-2xl border bg-white/90 py-2 pr-4 pl-2 shadow-xs backdrop-blur transition-colors";
+  return latest.url ? (
+    <SmartLink href={latest.url} className={cn(className, "hover:border-foreground/30")}>
+      {body}
+    </SmartLink>
+  ) : (
+    <p className={className}>{body}</p>
   );
 }

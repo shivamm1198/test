@@ -10,6 +10,7 @@ import { GalleryPreview } from "@/components/home/gallery-preview";
 import { Hero } from "@/components/home/hero";
 import { InternshipSection } from "@/components/home/internship";
 import { JoinCta } from "@/components/home/join-cta";
+import { LeadershipSection } from "@/components/home/leadership";
 import { MembersSection } from "@/components/home/members";
 import { NewsSection } from "@/components/home/news";
 import { PatronsSection } from "@/components/home/patrons";
@@ -35,6 +36,7 @@ export default async function HomePage() {
         stateMembers={content.stateMembers}
         images={content.images}
         joinHref={joinHref(content.links)}
+        latest={content.latestUpdate}
       />
       <ValuesMarquee />
       <AboutSection
@@ -62,6 +64,7 @@ export default async function HomePage() {
           text={content.sectionText}
         />
       )}
+      <LeadershipSection leadership={content.leadership} />
       <GalleryPreview
         gallery={gallery}
         text={content.sectionText}

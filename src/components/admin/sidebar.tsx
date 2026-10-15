@@ -8,12 +8,14 @@ import {
   ArrowUpRight,
   CalendarDays,
   GraduationCap,
+  IdCard,
   Images,
   LayoutDashboard,
   LogOut,
   Menu,
   NotebookPen,
   PenSquare,
+  UsersRound,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -28,14 +30,18 @@ export const adminNav = [
   { href: "/admin/events", label: "Events", Icon: CalendarDays },
   { href: "/admin/gallery", label: "Gallery", Icon: Images },
   { href: "/admin/journal", label: "Student Journal", Icon: NotebookPen },
-  { href: "/portal", label: "Internship portal", Icon: GraduationCap },
+  { href: "/admin/registry", label: "Registered members", Icon: IdCard },
+  { href: "/admin/team", label: "Team", Icon: UsersRound, presidentOnly: true },
+  { href: "/portal", label: "Internship portal", Icon: GraduationCap, presidentOnly: true },
 ];
 
 function isActive(pathname: string, href: string) {
   return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
 }
 
-export function AdminSidebar({ email, logo }: { email: string; logo: string }) {
+type SidebarProps = { email: string; logo: string; role: "president" | "coordinator" };
+
+export function AdminSidebar({ email, logo, role }: SidebarProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -59,14 +65,14 @@ export function AdminSidebar({ email, logo }: { email: string; logo: string }) {
           </SheetTrigger>
           <SheetContent side="left" className="w-72 border-0 bg-ink p-0 text-white">
             <SheetTitle className="sr-only">Dashboard menu</SheetTitle>
-            <SidebarBody email={email} logo={logo} onNavigate={() => setOpen(false)} />
+            <SidebarBody email={email} logo={logo} role={role} onNavigate={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
       </header>
 
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 bg-ink text-white lg:block">
-        <SidebarBody email={email} logo={logo} />
+        <SidebarBody email={email} logo={logo} role={role} />
       </aside>
     </>
   );
@@ -75,12 +81,9 @@ export function AdminSidebar({ email, logo }: { email: string; logo: string }) {
 function SidebarBody({
   email,
   logo,
+  role,
   onNavigate,
-}: {
-  email: string;
-  logo: string;
-  onNavigate?: () => void;
-}) {
+}: SidebarProps & { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
@@ -95,34 +98,36 @@ function SidebarBody({
       </Link>
 
       <nav aria-label="Dashboard" className="flex flex-col gap-1 px-3">
-        {adminNav.map(({ href, label, Icon }) => {
-          const active = isActive(pathname, href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              onClick={onNavigate}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "relative flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
-                active ? "text-white" : "text-white/55 hover:bg-white/5 hover:text-white",
-              )}
-            >
-              {active && (
-                <motion.span
-                  layoutId="admin-nav"
-                  className="absolute inset-0 rounded-md bg-white/10"
-                  transition={{ type: "spring", stiffness: 400, damping: 36 }}
-                />
-              )}
-              {active && (
-                <span className="absolute top-2 bottom-2 left-0 w-[2px] rounded gold-gradient" />
-              )}
-              <Icon className={cn("relative size-4", active && "text-gold-light")} />
-              <span className="relative">{label}</span>
-            </Link>
-          );
-        })}
+        {adminNav
+          .filter((item) => role === "president" || !item.presidentOnly)
+          .map(({ href, label, Icon }) => {
+            const active = isActive(pathname, href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={onNavigate}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "relative flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
+                  active ? "text-white" : "text-white/55 hover:bg-white/5 hover:text-white",
+                )}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="admin-nav"
+                    className="absolute inset-0 rounded-md bg-white/10"
+                    transition={{ type: "spring", stiffness: 400, damping: 36 }}
+                  />
+                )}
+                {active && (
+                  <span className="absolute top-2 bottom-2 left-0 w-[2px] rounded gold-gradient" />
+                )}
+                <Icon className={cn("relative size-4", active && "text-gold-light")} />
+                <span className="relative">{label}</span>
+              </Link>
+            );
+          })}
       </nav>
 
       <div className="mt-auto flex flex-col gap-1 border-t border-white/10 p-3">
@@ -142,7 +147,10 @@ function SidebarBody({
             <LogOut className="size-4" /> Sign out
           </button>
         </form>
-        <p className="truncate px-3 pt-2 text-xs text-white/35" title={email}>
+        <p className="px-3 pt-2 text-[10px] font-semibold tracking-[0.2em] text-gold-light/70 uppercase">
+          {role === "president" ? "President" : "Coordinator"}
+        </p>
+        <p className="truncate px-3 text-xs text-white/35" title={email}>
           {email}
         </p>
       </div>

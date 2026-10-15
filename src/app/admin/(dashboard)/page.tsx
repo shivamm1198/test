@@ -4,9 +4,11 @@ import {
   ArrowRight,
   CalendarDays,
   GraduationCap,
+  IdCard,
   Images,
   NotebookPen,
   PenSquare,
+  UsersRound,
 } from "lucide-react";
 
 import { getAdminSession } from "@/lib/content/admin";
@@ -17,9 +19,10 @@ import { RelativeTime } from "@/components/admin/relative-time";
 export const metadata: Metadata = { title: "Overview" };
 
 export default async function AdminOverviewPage() {
-  const { supabase } = await getAdminSession();
+  const { supabase, role } = await getAdminSession();
+  const president = role === "president";
 
-  const [events, drafts, gallery, content, articles, programs] = await Promise.all([
+  const [events, drafts, gallery, content, articles, programs, registry, team] = await Promise.all([
     supabase.from("events").select("id", { count: "exact", head: true }),
     supabase.from("events").select("id", { count: "exact", head: true }).eq("published", false),
     supabase.from("gallery_items").select("id", { count: "exact", head: true }),
@@ -29,6 +32,8 @@ export default async function AdminOverviewPage() {
       .order("updated_at", { ascending: false }),
     supabase.from("articles").select("id", { count: "exact", head: true }),
     supabase.from("internship_programs").select("id", { count: "exact", head: true }),
+    supabase.from("registered_members").select("id", { count: "exact", head: true }),
+    supabase.from("admins").select("user_id", { count: "exact", head: true }).eq("role", "coordinator"),
   ]);
 
   const lastEdit = content.data?.[0]?.updated_at ?? null;
@@ -65,7 +70,27 @@ export default async function AdminOverviewPage() {
         : `${articles.count ?? 0} articles`,
     },
     {
+      href: "/admin/registry",
+      Icon: IdCard,
+      title: "Registered members",
+      text: "The full list of VES members across India, with their IDs. Import from a spreadsheet.",
+      stat: registry.error
+        ? "Run supabase/team-and-registry.sql to enable"
+        : `${(registry.count ?? 0).toLocaleString("en-IN")} members`,
+    },
+    {
+      href: "/admin/team",
+      presidentOnly: true,
+      Icon: UsersRound,
+      title: "Team",
+      text: "Appoint coordinators who can edit the website (everything except internships).",
+      stat: team.error
+        ? "Run supabase/team-and-registry.sql to enable"
+        : `${team.count ?? 0} ${team.count === 1 ? "coordinator" : "coordinators"}`,
+    },
+    {
       href: "/portal",
+      presidentOnly: true,
       Icon: GraduationCap,
       title: "Internship portal",
       text: "Create internships, appoint coordinators, invite interns with a link and follow their tasks.",
@@ -83,7 +108,9 @@ export default async function AdminOverviewPage() {
         description="Everything on the website is managed from here. Changes go live as soon as you save."
       />
       <div className="grid gap-5 p-5 sm:p-8 md:grid-cols-2 xl:grid-cols-3">
-        {cards.map(({ href, Icon, title, text, stat, updated }) => (
+        {cards
+          .filter((c) => president || !("presidentOnly" in c && c.presidentOnly))
+          .map(({ href, Icon, title, text, stat, updated }) => (
           <Link
             key={href}
             href={href}

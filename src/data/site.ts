@@ -9,7 +9,8 @@
  * NOTE: Names, numbers, dates, and contact details below are SAMPLE content.
  */
 
-import type { ArticleItem, EventItem, GalleryItem, SiteContent } from "@/lib/content/schema";
+import type {
+  RegisteredMember, ArticleItem, EventItem, GalleryItem, SiteContent } from "@/lib/content/schema";
 
 const site: SiteContent["site"] = {
   name: "Vidhi Ekta Sngh",
@@ -37,10 +38,15 @@ export const nav = [
   { href: "/about", label: "About" },
   { href: "/internships", label: "Internships" },
   { href: "/wings", label: "Wings" },
-  { href: "/journey", label: "Journey" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/journal", label: "Journal" },
   { href: "/contact", label: "Contact" },
+];
+
+/** Pages under the "More" menu in the header. */
+export const navMore = [
+  { href: "/registered-members", label: "Registered Members", description: "Every VES member across India" },
+  { href: "/journal", label: "Journal", description: "Articles and papers by law students" },
+  { href: "/journey", label: "Journey", description: "Milestones since our founding" },
 ];
 
 /** Joined members per state / UT, keyed by the map's location id. */
@@ -503,6 +509,8 @@ const wings: SiteContent["wings"] = [
     summary:
       "Sources, verifies and matches internships with chambers, firms, NGOs and legal-aid bodies.",
     activities: ["Bi-annual internship cycles", "Mentor matching", "CV & interview clinics"],
+    viewLabel: "View wing",
+    viewUrl: "",
   },
   {
     key: "legal-aid",
@@ -512,6 +520,8 @@ const wings: SiteContent["wings"] = [
     summary:
       "Takes free legal advice and rights awareness to villages, slums and under-served districts.",
     activities: ["Rural legal-aid camps", "Para-legal volunteer training", "DLSA partnerships"],
+    viewLabel: "View wing",
+    viewUrl: "",
   },
   {
     key: "moot",
@@ -524,6 +534,8 @@ const wings: SiteContent["wings"] = [
       "Mock trial series",
       "Oral advocacy masterclasses",
     ],
+    viewLabel: "View wing",
+    viewUrl: "",
   },
   {
     key: "research",
@@ -532,6 +544,8 @@ const wings: SiteContent["wings"] = [
     head: "Priya Iyer",
     summary: "Publishes the VES Quarterly Law Review and policy briefs on emerging areas of law.",
     activities: ["Quarterly Law Review", "Policy briefs", "Legal writing bootcamps"],
+    viewLabel: "View wing",
+    viewUrl: "",
   },
   {
     key: "women",
@@ -541,6 +555,8 @@ const wings: SiteContent["wings"] = [
     summary:
       "Champions women in law and works on awareness around gender justice and workplace safety.",
     activities: ["Women in Law Fellowship", "POSH awareness", "Helpline referrals"],
+    viewLabel: "View wing",
+    viewUrl: "",
   },
   {
     key: "student",
@@ -549,6 +565,8 @@ const wings: SiteContent["wings"] = [
     head: "Riya Kapoor",
     summary: "The voice of law students — campus chapters, ambassadors and peer-learning circles.",
     activities: ["Campus chapters", "Ambassador programme", "Peer study circles"],
+    viewLabel: "View wing",
+    viewUrl: "",
   },
   {
     key: "events",
@@ -558,6 +576,8 @@ const wings: SiteContent["wings"] = [
     summary:
       "Plans seminars, conclaves and commemorations that bring the legal fraternity together.",
     activities: ["Constitution Day", "Career conclaves", "Guest lecture series"],
+    viewLabel: "View wing",
+    viewUrl: "",
   },
   {
     key: "media",
@@ -567,6 +587,8 @@ const wings: SiteContent["wings"] = [
     summary:
       "Tells the VES story through video, social media, newsletters and the YouTube channel.",
     activities: ["YouTube explainers", "Monthly newsletter", "Event coverage"],
+    viewLabel: "View wing",
+    viewUrl: "",
   },
 ];
 
@@ -892,11 +914,70 @@ const sectionText: SiteContent["sectionText"] = {
   journalDescription:
     "Articles, case comments and research papers by law students across India — read online or download the full paper.",
 
+  registryEyebrow: "Registered members",
+  registryTitle: "Our members across India",
+  registryDescription:
+    "Every law student and legal professional registered with VES, with their membership ID. Search by name, place or ID.",
   joinTitle: "Join India's fraternity of future lawyers",
   joinText:
     "Membership is free for law students. Get early access to internships, scholarships, mentorship circles and every VES event.",
   joinButtonLabel: "Become a member",
   joinSecondaryLabel: "Explore our wings",
+};
+
+const leadership: SiteContent["leadership"] = {
+  eyebrow: "Lead with VES",
+  title: "Represent VES where the law is practised and taught",
+  description:
+    "VES appoints leaders to run its work on a college campus or at a court. They guide interns, carry out initiatives directed by the national executive, and are VES's voice on the ground.",
+  programmes: [
+    {
+      icon: "graduation-cap",
+      title: "Campus Leadership",
+      where: "At a law school or university campus",
+      text: "Lead VES at your college: build the campus chapter, bring students into our internships and events, and carry out the programmes VES directs.",
+      duties: [
+        "Represent VES on your campus",
+        "Manage and mentor interns from your college",
+        "Run VES drives, workshops and legal-aid initiatives",
+        "Report progress to the national executive",
+      ],
+      buttonLabel: "Apply for Campus Leadership",
+      url: "",
+    },
+    {
+      icon: "landmark",
+      title: "Court Leadership",
+      where: "At a District Court, a High Court or the Supreme Court",
+      text: "Oversee VES's work at a court in your district, state or city — or at the Supreme Court — and be the link between the bar, our interns and VES.",
+      duties: [
+        "Oversee VES work at your court",
+        "Supervise interns placed with advocates and chambers",
+        "Implement initiatives directed by VES",
+        "Build ties with the local bar and legal-aid bodies",
+      ],
+      buttonLabel: "Apply for Court Leadership",
+      url: "",
+    },
+  ],
+};
+
+const latestUpdate: SiteContent["latestUpdate"] = {
+  show: true,
+  label: "Latest",
+  text: "Applications open for the Winter Internship Cycle — 60+ openings across 14 cities",
+  date: "28 Sep 2026",
+  url: "/internships",
+};
+
+const donate: SiteContent["donate"] = {
+  show: true,
+  title: "Support our work",
+  text: "Your donation funds legal-aid camps, scholarships for law students and free internships across India.",
+  buttonLabel: "Donate now",
+  url: "",
+  upiId: "",
+  details: "",
 };
 
 export const defaultContent: SiteContent = {
@@ -921,6 +1002,9 @@ export const defaultContent: SiteContent = {
   aboutPage,
   wingsPage,
   sectionText,
+  leadership,
+  latestUpdate,
+  donate,
 };
 
 /** Sample journal articles, shown only when Supabase isn't configured. */
@@ -962,3 +1046,40 @@ export const sampleArticles: ArticleItem[] = [
     published: true,
   },
 ];
+
+/** Sample registered members, shown only when Supabase isn't configured. */
+export const sampleRegisteredMembers: RegisteredMember[] = [
+  ["Aarav Sharma", "New Delhi"],
+  ["Ananya Iyer", "Chennai, Tamil Nadu"],
+  ["Kabir Mehta", "Mumbai, Maharashtra"],
+  ["Fatima Siddiqui", "Lucknow, Uttar Pradesh"],
+  ["Rohan Das", "Kolkata, West Bengal"],
+  ["Ishita Rao", "Bengaluru, Karnataka"],
+  ["Arjun Nair", "Kochi, Kerala"],
+  ["Meera Joshi", "Pune, Maharashtra"],
+  ["Vikram Singh", "Jaipur, Rajasthan"],
+  ["Sana Khan", "Hyderabad, Telangana"],
+  ["Aditya Kulkarni", "Nagpur, Maharashtra"],
+  ["Priya Menon", "Thiruvananthapuram, Kerala"],
+  ["Harsh Vardhan", "Patna, Bihar"],
+  ["Nikita Agarwal", "Indore, Madhya Pradesh"],
+  ["Devansh Gupta", "Prayagraj, Uttar Pradesh"],
+  ["Tanvi Deshpande", "Aurangabad, Maharashtra"],
+  ["Rahul Bora", "Guwahati, Assam"],
+  ["Simran Kaur", "Chandigarh"],
+  ["Yash Patel", "Ahmedabad, Gujarat"],
+  ["Aisha Begum", "Srinagar, Jammu & Kashmir"],
+  ["Karan Malhotra", "Gurugram, Haryana"],
+  ["Pooja Mishra", "Bhopal, Madhya Pradesh"],
+  ["Siddharth Rao", "Visakhapatnam, Andhra Pradesh"],
+  ["Neha Chauhan", "Dehradun, Uttarakhand"],
+  ["Om Prakash", ""],
+  ["Lavanya Reddy", "Warangal, Telangana"],
+  ["Manav Bhatt", "Shimla, Himachal Pradesh"],
+  ["Riya Sen", "Bhubaneswar, Odisha"],
+  ["Zoya Ahmed", "Ranchi, Jharkhand"],
+  ["Gaurav Tiwari", "Varanasi, Uttar Pradesh"],
+].map(([name, location], i) => {
+  const code = `VES-${String(i + 1).padStart(4, "0")}`;
+  return { id: code, code, name, location };
+});

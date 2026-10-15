@@ -2,7 +2,13 @@ import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultContent, sampleArticles, sampleEvents, sampleGallery } from "@/data/site";
+import {
+  defaultContent,
+  sampleArticles,
+  sampleEvents,
+  sampleGallery,
+  sampleRegisteredMembers,
+} from "@/data/site";
 import { createPublicClient } from "@/lib/supabase/public";
 import { documentUrl, isSupabaseConfigured, mediaUrl } from "@/lib/supabase/env";
 import { formatEventDate } from "./derive";
@@ -13,6 +19,7 @@ import {
   type ArticleItem,
   type EventItem,
   type GalleryItem,
+  type RegisteredMember,
   type SiteContent,
 } from "./schema";
 
@@ -22,6 +29,7 @@ export const TAGS = {
   events: "events",
   gallery: "gallery",
   articles: "articles",
+  registry: "registered-members",
 } as const;
 
 export type ContentRow = { key: string; data: unknown; updated_at?: string };
@@ -215,4 +223,42 @@ export async function getArticle(slug: string): Promise<ArticleItem | null> {
     return null;
   }
   return data ? toArticleItem(data as ArticleRow) : null;
+}
+
+type RegistryClient = Pick<ReturnType<typeof createPublicClient>, "from">;
+export type RegisteredMemberRow = { id: string; member_code: string; name: string; location: string };
+
+/**
+ * Every registered member, ordered by ID. Supabase returns at most 1,000 rows
+ * per request, so this pages through the whole list.
+ */
+export async function fetchRegisteredMembers(
+  client: RegistryClient,
+): Promise<{ members: RegisteredMember[]; error?: string }> {
+  const pageSize = 1000;
+  const members: RegisteredMember[] = [];
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await client
+      .from("registered_members")
+      .select("id, member_code, name, location")
+      .order("member_code")
+      .range(from, from + pageSize - 1);
+    if (error) return { members, error: error.message };
+    const rows = (data ?? []) as RegisteredMemberRow[];
+    members.push(
+      ...rows.map((r) => ({ id: r.id, code: r.member_code, name: r.name, location: r.location })),
+    );
+    if (rows.length < pageSize) return { members };
+  }
+}
+
+export async function getRegisteredMembers(): Promise<RegisteredMember[]> {
+  "use cache";
+  cacheTag(TAGS.registry);
+  cacheLife("minutes");
+
+  if (!isSupabaseConfigured) return sampleRegisteredMembers;
+  const { members, error } = await fetchRegisteredMembers(createPublicClient());
+  if (error) console.error("[registry] Could not load registered members:", error);
+  return members;
 }

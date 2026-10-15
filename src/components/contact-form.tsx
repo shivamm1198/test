@@ -16,6 +16,8 @@ export const subjects = [
   { value: "scholarship", label: "Scholarships" },
   { value: "sponsor", label: "Sponsor a student" },
   { value: "chapter", label: "Start a state / campus chapter" },
+  { value: "leadership", label: "Campus / Court Leadership" },
+  { value: "donation", label: "Donations" },
   { value: "volunteer", label: "Volunteer with a wing" },
   { value: "media", label: "Media & partnerships" },
   { value: "general", label: "General enquiry" },

@@ -6,11 +6,34 @@
 -- (Already included in schema.sql for brand-new projects.) Safe to re-run.
 --
 -- Roles
---   • President      – rows in public.admins; sees and manages everything.
+--   • President      – row in public.admins with role 'president'; sees and
+--                      manages everything. Dashboard coordinators get no access.
 --   • Internship admin – member of a programme with role 'admin'; manages its
 --                        interns, invite links, tasks and reviews.
 --   • Intern         – member of a programme with role 'intern'; sees only
 --                        their own tasks and submissions.
+
+-- ----------------------------------------------------------------------------
+-- Prerequisite: president vs coordinator roles on the admins table
+-- ----------------------------------------------------------------------------
+alter table public.admins add column if not exists role text not null default 'president';
+alter table public.admins add column if not exists full_name text not null default '';
+
+create or replace function public.is_president()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.admins
+    where user_id = (select auth.uid()) and role = 'president'
+  );
+$$;
+
+revoke execute on function public.is_president() from public;
+grant execute on function public.is_president() to anon, authenticated;
 -- ============================================================================
 
 
@@ -104,7 +127,7 @@ stable
 security definer
 set search_path = ''
 as $$
-  select public.is_admin() or exists (
+  select public.is_president() or exists (
     select 1 from public.internship_members
     where program_id = pid and user_id = (select auth.uid())
   );
@@ -117,7 +140,7 @@ stable
 security definer
 set search_path = ''
 as $$
-  select public.is_admin() or exists (
+  select public.is_president() or exists (
     select 1 from public.internship_members
     where program_id = pid and user_id = (select auth.uid()) and role = 'admin'
   );
@@ -131,7 +154,7 @@ stable
 security definer
 set search_path = ''
 as $$
-  select public.is_admin() or exists (
+  select public.is_president() or exists (
     select 1 from public.internship_members where user_id = (select auth.uid())
   );
 $$;
@@ -225,8 +248,8 @@ create policy "Members can read their programmes"
 drop policy if exists "President manages programmes" on public.internship_programs;
 create policy "President manages programmes"
   on public.internship_programs for all to authenticated
-  using ((select public.is_admin()))
-  with check ((select public.is_admin()));
+  using ((select public.is_president()))
+  with check ((select public.is_president()));
 
 -- Members: you see yourself; programme admins see everyone in the programme.
 drop policy if exists "Read own or managed memberships" on public.internship_members;
@@ -245,7 +268,7 @@ drop policy if exists "Remove members" on public.internship_members;
 create policy "Remove members"
   on public.internship_members for delete to authenticated
   using (
-    (select public.is_admin())
+    (select public.is_president())
     or (role = 'intern' and (select public.is_program_admin(program_id)))
   );
 
@@ -254,11 +277,11 @@ drop policy if exists "Manage invites" on public.internship_invites;
 create policy "Manage invites"
   on public.internship_invites for all to authenticated
   using (
-    (select public.is_admin())
+    (select public.is_president())
     or (role = 'intern' and (select public.is_program_admin(program_id)))
   )
   with check (
-    (select public.is_admin())
+    (select public.is_president())
     or (role = 'intern' and (select public.is_program_admin(program_id)))
   );
 

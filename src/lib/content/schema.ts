@@ -18,6 +18,15 @@ const optionalUrl = z
   )
   .default("");
 const strList = z.array(z.string().trim().min(1));
+/** Empty, a page on this site ("/gallery") or a full web link. */
+const optionalLink = z
+  .string()
+  .trim()
+  .refine(
+    (v) => v === "" || /^https?:\/\/\S+$/i.test(v) || /^\/(?!\/)\S*$/.test(v),
+    "Enter a full link starting with https://, or a page on this site like /gallery",
+  )
+  .default("");
 
 export const siteSchema = z.object({
   name: str.min(1, "Name is required"),
@@ -227,6 +236,10 @@ export const sectionTextSchema = z.object({
   journalTitle: optionalStr,
   journalDescription: optionalStr,
 
+  registryEyebrow: optionalStr,
+  registryTitle: optionalStr,
+  registryDescription: optionalStr,
+
   joinTitle: optionalStr,
   joinText: optionalStr,
   joinButtonLabel: optionalStr,
@@ -250,6 +263,8 @@ export const wingsSchema = z.array(
     head: optionalStr,
     summary: optionalStr,
     activities: strList,
+    viewLabel: optionalStr,
+    viewUrl: optionalLink,
   }),
 );
 
@@ -270,6 +285,44 @@ export const imagesSchema = z.object({
   about2: optionalStr,
   founder1: optionalStr,
   founder2: optionalStr,
+});
+
+/** The Campus and Court Leadership programmes on the homepage. */
+export const leadershipSchema = z.object({
+  eyebrow: optionalStr,
+  title: optionalStr,
+  description: optionalStr,
+  programmes: z.array(
+    z.object({
+      icon: z.enum(iconNames),
+      title: str.min(1, "Title is required"),
+      where: optionalStr,
+      text: optionalStr,
+      duties: strList,
+      buttonLabel: optionalStr,
+      url: optionalLink,
+    }),
+  ),
+});
+
+/** The single "what VES did latest" line in the homepage hero. */
+export const latestUpdateSchema = z.object({
+  show: z.boolean().default(true),
+  label: optionalStr,
+  text: optionalStr,
+  date: optionalStr,
+  url: optionalLink,
+});
+
+/** The "Donate" block in the footer. */
+export const donateSchema = z.object({
+  show: z.boolean().default(true),
+  title: optionalStr,
+  text: optionalStr,
+  buttonLabel: optionalStr,
+  url: optionalLink,
+  upiId: optionalStr,
+  details: optionalStr,
 });
 
 export const contentSchemas = {
@@ -294,6 +347,9 @@ export const contentSchemas = {
   aboutPage: aboutPageSchema,
   wingsPage: wingsPageSchema,
   sectionText: sectionTextSchema,
+  leadership: leadershipSchema,
+  latestUpdate: latestUpdateSchema,
+  donate: donateSchema,
 } as const;
 
 export type ContentKey = keyof typeof contentSchemas;
@@ -305,6 +361,9 @@ export type Site = SiteContent["site"];
 export type Links = SiteContent["links"];
 export type SiteImages = SiteContent["images"];
 export type SectionText = SiteContent["sectionText"];
+export type Leadership = SiteContent["leadership"];
+export type LatestUpdate = SiteContent["latestUpdate"];
+export type Donate = SiteContent["donate"];
 export type Founder = SiteContent["founder"];
 export type Pillar = SiteContent["pillars"][number];
 export type Internship = SiteContent["internships"][number];
@@ -403,3 +462,14 @@ export type ArticleItem = {
   readingMinutes: number;
   published: boolean;
 };
+
+export const registeredMemberInputSchema = z.object({
+  name: str.min(1, "Enter a name").max(200),
+  location: str.max(200).default(""),
+  member_code: str.max(40).default(""),
+});
+
+export type RegisteredMemberInput = z.infer<typeof registeredMemberInputSchema>;
+
+/** One person in the Registered Members list. */
+export type RegisteredMember = { id: string; code: string; name: string; location: string };

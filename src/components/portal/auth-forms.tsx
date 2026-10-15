@@ -91,20 +91,39 @@ export function PortalLoginForm({ next, linkError }: { next?: string; linkError?
   );
 }
 
+type AuthAction = (prev: PortalAuthState, form: FormData) => Promise<PortalAuthState>;
+
+/** The Server Actions behind the invite forms (portal by default, or the dashboard team). */
+export type JoinActions = {
+  current: AuthAction;
+  create: AuthAction;
+  existing: AuthAction;
+  signOut: () => Promise<void>;
+};
+
+const portalJoinActions: JoinActions = {
+  current: joinAsCurrentUser,
+  create: joinWithNewAccount,
+  existing: joinWithExistingAccount,
+  signOut: portalSignOut,
+};
+
 /** Invite page: join with the current account, a new account, or an existing one. */
 export function JoinForms({
   token,
   signedInAs,
   roleLabel,
+  actions = portalJoinActions,
 }: {
   token: string;
   signedInAs: string | null;
   roleLabel: string;
+  actions?: JoinActions;
 }) {
   const [mode, setMode] = React.useState<"new" | "existing">("new");
-  const [current, currentAction, currentPending] = useActionState(joinAsCurrentUser, {});
-  const [created, createAction, createPending] = useActionState(joinWithNewAccount, {});
-  const [existing, existingAction, existingPending] = useActionState(joinWithExistingAccount, {});
+  const [current, currentAction, currentPending] = useActionState(actions.current, {});
+  const [created, createAction, createPending] = useActionState(actions.create, {});
+  const [existing, existingAction, existingPending] = useActionState(actions.existing, {});
 
   if (signedInAs) {
     return (
@@ -118,7 +137,7 @@ export function JoinForms({
           <Messages state={current} />
           <Submit pending={currentPending}>Join as {roleLabel}</Submit>
         </form>
-        <form action={portalSignOut}>
+        <form action={actions.signOut}>
           <button
             type="submit"
             className="text-sm text-muted-foreground underline-offset-4 hover:text-ink hover:underline"

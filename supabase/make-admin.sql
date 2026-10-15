@@ -1,5 +1,8 @@
 -- ============================================================================
--- Give a user access to the dashboards
+-- Make a user a PRESIDENT (full access to every dashboard and the Internship portal)
+--
+-- Coordinators (website editors) don't need this: the president appoints them
+-- from the dashboard's Team page with an invite link.
 --
 -- 1. Create the user first: Authentication → Users → Add user → Create new user
 --    (tick "Auto Confirm User").

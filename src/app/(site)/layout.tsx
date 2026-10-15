@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SiteLayout({ children }: LayoutProps<"/">) {
-  const [{ site, links }, year] = await Promise.all([getContent(), getCurrentYear()]);
+  const [{ site, links, donate }, year] = await Promise.all([getContent(), getCurrentYear()]);
 
   return (
     <>
@@ -40,7 +40,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       <main id="main" className="flex-1">
         {children}
       </main>
-      <SiteFooter site={site} year={year} />
+      <SiteFooter site={site} year={year} donate={donate} />
     </>
   );
 }
