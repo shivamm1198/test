@@ -13,6 +13,7 @@ This connects the website to Supabase so the president can edit content from the
 | **Student Journal**    | `/admin/journal`  | Student articles with an attached PDF or Word paper                                                                                                                   |
 | **Registered members** | `/admin/registry` | The full member list on `/registered-members`: name, location and member ID. Import from a spreadsheet                                                                |
 | **Team**               | `/admin/team`     | President only: appoint dashboard coordinators with an invite link, remove them                                                                                       |
+| **Messages**           | `/admin/messages` | President only: messages sent through the contact form on `/contact`                                                                                                  |
 | **Internship portal**  | `/portal`         | Internships, coordinators, intern invite links, tasks with deadlines, intern work and progress                                                                        |
 
 ---
@@ -58,6 +59,11 @@ This creates:
 > [`supabase/internships.sql`](supabase/internships.sql) once in a new SQL Editor query. It creates
 > the internship tables, the invite-link functions and a **private** `internship-files` bucket
 > (25 MB per file). New projects don't need it, because `schema.sql` already includes it.
+
+> **Already set up before contact-form Messages were added?** Run
+> [`supabase/contact-messages.sql`](supabase/contact-messages.sql) once in a new SQL Editor query
+> (after `team-and-registry.sql`). It creates the `contact_messages` table that only the president
+> can read. New projects don't need it, because `schema.sql` already includes it.
 
 > **Already set up before the Team page and Registered Members were added?** Run
 > [`supabase/team-and-registry.sql`](supabase/team-and-registry.sql) once in a new SQL Editor query
@@ -196,6 +202,12 @@ Open **`https://your-site/admin`**, sign in with the president's email and passw
   or a CSV file, one member per line: _Name, Location, ID_. Location and ID are optional; members
   without an ID get the next one automatically (VES-0001, VES-0002 …). **Export CSV** downloads the
   whole list. Tick rows to delete several at once.
+- **Messages** (`/admin/messages`, president only): every message sent through the contact form on
+  `/contact`, newest first, with the sender's email, phone, college and topic. Unread messages show a
+  gold count next to **Messages** in the sidebar. Open one to read it (it's marked read), then
+  **Reply by email**, **Mark unread**, **Archive** or **Delete**. Coordinators and internship
+  coordinators can't see this page or the messages: the database only lets the president read them.
+  To stop spam, each email address can send at most 5 messages an hour.
 - **Team** (`/admin/team`, president only): **Appoint a coordinator** creates an invite link (expires
   after 1–30 days, for 1 person by default). Send it to them; they create an account or sign in and get
   the dashboard. Coordinators can use every dashboard (Homepage editor, Events, Gallery, Student
@@ -252,23 +264,24 @@ hour.
 
 ## Troubleshooting
 
-| Problem                                                                        | Fix                                                                                                            |
-| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Login page says **"Supabase isn't connected yet"**                             | The two environment variables are missing. Add them (Step 7) and redeploy or restart.                          |
-| **"Incorrect email or password"**                                              | Check the user in **Authentication → Users**, or use **⋯ → Send password recovery** there.                     |
-| **"This account doesn't have dashboard access"**                               | Run `supabase/make-admin.sql` with that email (Step 5).                                                        |
-| **"Email isn't confirmed"**                                                    | In **Authentication → Users**, open the user and confirm them, or recreate with **Auto Confirm User** ticked.  |
-| Upload fails with **"new row violates row-level security"**                    | The account isn't in `admins`, or `schema.sql` didn't finish. Re-run both.                                     |
-| **"permission denied for table …"**                                            | Re-run `schema.sql`; it includes the required grants.                                                          |
-| A change made directly in Supabase's **Table Editor** isn't on the site        | Edits from the dashboards appear instantly. Direct table edits show up within about a minute.                  |
-| Want to change the president's password                                        | **Authentication → Users → ⋯ → Send password recovery**, or delete and recreate the user (then re-run Step 5). |
-| Intern sees **"New accounts are switched off in Supabase"**                    | Turn **Allow new users to sign up** on (Step 6).                                                               |
-| Intern is told **"we've emailed you a confirmation link"** but nothing arrives | Turn **Confirm email** off (Step 6), or set up custom SMTP. Then they open the invite link again.              |
-| Invite page says **"This link has expired"**                                   | The link expired, was revoked or reached its sign-up limit. Create a new one in **Invite links**.              |
-| **"This account isn't part of an internship yet"** on `/portal/login`          | The account never joined, or was removed. Send them a fresh invite link.                                       |
-| Portal shows **"relation internship_programs does not exist"**                 | Run `supabase/internships.sql` (Step 2).                                                                       |
-| Team or Registered members says **"Run supabase/team-and-registry.sql"**       | Run `supabase/team-and-registry.sql` (Step 2).                                                                 |
-| A coordinator says the Internship portal shows **"Not part of an internship"** | Expected: dashboard coordinators don't have portal access. Only the president does.                            |
+| Problem                                                                                                 | Fix                                                                                                            |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Login page says **"Supabase isn't connected yet"**                                                      | The two environment variables are missing. Add them (Step 7) and redeploy or restart.                          |
+| **"Incorrect email or password"**                                                                       | Check the user in **Authentication → Users**, or use **⋯ → Send password recovery** there.                     |
+| **"This account doesn't have dashboard access"**                                                        | Run `supabase/make-admin.sql` with that email (Step 5).                                                        |
+| **"Email isn't confirmed"**                                                                             | In **Authentication → Users**, open the user and confirm them, or recreate with **Auto Confirm User** ticked.  |
+| Upload fails with **"new row violates row-level security"**                                             | The account isn't in `admins`, or `schema.sql` didn't finish. Re-run both.                                     |
+| **"permission denied for table …"**                                                                     | Re-run `schema.sql`; it includes the required grants.                                                          |
+| A change made directly in Supabase's **Table Editor** isn't on the site                                 | Edits from the dashboards appear instantly. Direct table edits show up within about a minute.                  |
+| Want to change the president's password                                                                 | **Authentication → Users → ⋯ → Send password recovery**, or delete and recreate the user (then re-run Step 5). |
+| Intern sees **"New accounts are switched off in Supabase"**                                             | Turn **Allow new users to sign up** on (Step 6).                                                               |
+| Intern is told **"we've emailed you a confirmation link"** but nothing arrives                          | Turn **Confirm email** off (Step 6), or set up custom SMTP. Then they open the invite link again.              |
+| Invite page says **"This link has expired"**                                                            | The link expired, was revoked or reached its sign-up limit. Create a new one in **Invite links**.              |
+| **"This account isn't part of an internship yet"** on `/portal/login`                                   | The account never joined, or was removed. Send them a fresh invite link.                                       |
+| Portal shows **"relation internship_programs does not exist"**                                          | Run `supabase/internships.sql` (Step 2).                                                                       |
+| Team or Registered members says **"Run supabase/team-and-registry.sql"**                                | Run `supabase/team-and-registry.sql` (Step 2).                                                                 |
+| Messages says **"Run supabase/contact-messages.sql"**, or the contact form says it **couldn't be sent** | Run `supabase/contact-messages.sql` (Step 2).                                                                  |
+| A coordinator says the Internship portal shows **"Not part of an internship"**                          | Expected: dashboard coordinators don't have portal access. Only the president does.                            |
 
 ## How it fits together (for developers)
 

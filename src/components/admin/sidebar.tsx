@@ -10,6 +10,7 @@ import {
   GraduationCap,
   IdCard,
   Images,
+  Inbox,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -31,6 +32,7 @@ export const adminNav = [
   { href: "/admin/gallery", label: "Gallery", Icon: Images },
   { href: "/admin/journal", label: "Student Journal", Icon: NotebookPen },
   { href: "/admin/registry", label: "Registered members", Icon: IdCard },
+  { href: "/admin/messages", label: "Messages", Icon: Inbox, presidentOnly: true },
   { href: "/admin/team", label: "Team", Icon: UsersRound, presidentOnly: true },
   { href: "/portal", label: "Internship portal", Icon: GraduationCap, presidentOnly: true },
 ];
@@ -39,9 +41,15 @@ function isActive(pathname: string, href: string) {
   return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
 }
 
-type SidebarProps = { email: string; logo: string; role: "president" | "coordinator" };
+type SidebarProps = {
+  email: string;
+  logo: string;
+  role: "president" | "coordinator";
+  /** Unread contact messages, shown as a badge next to Messages. */
+  unread?: number;
+};
 
-export function AdminSidebar({ email, logo, role }: SidebarProps) {
+export function AdminSidebar({ email, logo, role, unread }: SidebarProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -65,14 +73,20 @@ export function AdminSidebar({ email, logo, role }: SidebarProps) {
           </SheetTrigger>
           <SheetContent side="left" className="w-72 border-0 bg-ink p-0 text-white">
             <SheetTitle className="sr-only">Dashboard menu</SheetTitle>
-            <SidebarBody email={email} logo={logo} role={role} onNavigate={() => setOpen(false)} />
+            <SidebarBody
+              email={email}
+              logo={logo}
+              role={role}
+              unread={unread}
+              onNavigate={() => setOpen(false)}
+            />
           </SheetContent>
         </Sheet>
       </header>
 
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 bg-ink text-white lg:block">
-        <SidebarBody email={email} logo={logo} role={role} />
+        <SidebarBody email={email} logo={logo} role={role} unread={unread} />
       </aside>
     </>
   );
@@ -82,6 +96,7 @@ function SidebarBody({
   email,
   logo,
   role,
+  unread,
   onNavigate,
 }: SidebarProps & { onNavigate?: () => void }) {
   const pathname = usePathname();
@@ -101,6 +116,7 @@ function SidebarBody({
         {adminNav
           .filter((item) => role === "president" || !item.presidentOnly)
           .map(({ href, label, Icon }) => {
+            const badge = href === "/admin/messages" ? (unread ?? 0) : 0;
             const active = isActive(pathname, href);
             return (
               <Link
@@ -124,7 +140,12 @@ function SidebarBody({
                   <span className="absolute top-2 bottom-2 left-0 w-[2px] rounded gold-gradient" />
                 )}
                 <Icon className={cn("relative size-4", active && "text-gold-light")} />
-                <span className="relative">{label}</span>
+                <span className="relative flex-1">{label}</span>
+                {badge > 0 && (
+                  <span className="relative rounded-full bg-gold px-1.5 py-0.5 text-[10px] leading-none font-semibold text-ink tabular-nums">
+                    {badge}
+                  </span>
+                )}
               </Link>
             );
           })}

@@ -42,6 +42,7 @@ All content is editable at **`/admin`** (Supabase login required):
 | Student Journal    | `/admin/journal`  | Student articles with attached PDF/Word papers, shown on the homepage and `/journal`                                                                 |
 | Registered members | `/admin/registry` | The `/registered-members` list: add, edit, delete, import from a spreadsheet, export CSV                                                             |
 | Team               | `/admin/team`     | President only: appoint and remove coordinators (every dashboard except the Internship portal)                                                       |
+| Messages           | `/admin/messages` | President only: contact form messages (read, reply, archive, delete)                                                                                 |
 
 ## Internship portal
 
@@ -79,9 +80,10 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_…
 
 ## Forms
 
-There is no backend yet. The contact and internship-application forms validate their input and then open
-the visitor's mail app with a pre-filled email to `site.email`. To store submissions instead, connect them to
-a route handler or a form service.
+The contact form saves each message to Supabase (`contact_messages`), and the president reads them at
+**`/admin/messages`**. Only the president can read them; the database enforces this, not just the
+dashboard. The internship apply dialog (used when an internship has no form link) still opens the
+visitor's mail app with a pre-filled email to `site.email`.
 
 ## Structure
 
@@ -104,7 +106,7 @@ src/
     supabase/          browser / server / public clients and the session proxy
   proxy.ts             refreshes the Supabase session on /admin, /portal and /auth routes
   data/site.ts         default content
-supabase/              SQL: schema.sql, journal.sql + internships.sql + team-and-registry.sql (existing projects), seed.sql (optional), make-admin.sql
+supabase/              SQL: schema.sql, journal.sql + internships.sql + team-and-registry.sql + contact-messages.sql (existing projects), seed.sql (optional), make-admin.sql
 scripts/               placeholder image generator
 ```
 
